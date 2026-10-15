@@ -293,7 +293,8 @@
     const q = encodeURIComponent(inv.address || inv.venue);
     // 해외 예식이면 구글 지도, 국내면 네이버 지도와 카카오맵
     const mapLinks = inv.region === 'overseas'
-      ? [['구글 지도', `https://www.google.com/maps/search/?api=1&query=${q}`]]
+      // 구글 지도는 주소 표기가 나라마다 달라 검색에 실패하는 일이 많아서, 예식장 이름으로 찾는다
+      ? [['구글 지도', `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(inv.venue || inv.address)}`]]
       : [['네이버 지도', `https://map.naver.com/p/search/${q}`], ['카카오맵', `https://map.kakao.com/link/search/${q}`]];
     mapLinks.forEach(([label, href]) => {
       const a = document.createElement('a');
