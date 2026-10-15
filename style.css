@@ -149,7 +149,11 @@ canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: bloc
 .home-demo { width: 100%; margin-top: 12px; }
 .sent { background: #fffaf0; border: 3px dashed var(--wood); padding: 10px; margin-top: 12px; }
 .my-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.my-list a { display: flex; justify-content: space-between; gap: 8px; text-decoration: none; }
+.my-list li { display: flex; gap: 6px; }
+.my-list a { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-decoration: none; text-align: left; }
+.my-list a span:first-child { overflow-wrap: anywhere; }
+.my-list a span:last-child { font-size: 12px; font-weight: 400; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.my-list .del { flex: 0 0 76px; padding: 8px 4px; font-size: 12px; white-space: nowrap; }
 .my-list:empty { display: none; }
 .share-row { display: flex; gap: 8px; align-items: center; }
 .share-url { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: 12px; background: #fffaf0; border: 3px solid var(--wood); padding: 6px 8px; user-select: all; }

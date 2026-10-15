@@ -653,7 +653,26 @@
       const names = document.createElement('span'); names.textContent = `${inv.groom} ♥ ${inv.bride}`;
       const date = document.createElement('span'); date.textContent = inv.wedding_date;
       a.append(names, date);
-      li.appendChild(a);
+      // 지우기: 실수로 지우지 않게 한 번 더 눌러야 지워진다
+      const del = document.createElement('button');
+      del.type = 'button'; del.className = 'btn danger del'; del.textContent = '삭제';
+      del.setAttribute('aria-label', `${inv.groom} ♥ ${inv.bride} 청첩장 삭제`);
+      del.addEventListener('click', async () => {
+        if (del.dataset.armed !== '1') {
+          del.dataset.armed = '1'; del.textContent = '정말 삭제';
+          setTimeout(() => { if (del.isConnected) { del.dataset.armed = ''; del.textContent = '삭제'; } }, 4000);
+          return;
+        }
+        del.disabled = true; del.textContent = '삭제 중…';
+        try {
+          await Store.deleteInvitation(inv.id);
+          toast(`${inv.groom} ♥ ${inv.bride} 청첩장을 지웠어요. 하객이 올린 술도 함께 지워졌어요.`);
+        } catch (e) {
+          del.disabled = false; del.dataset.armed = ''; del.textContent = '삭제';
+          toast('청첩장을 지우지 못했어요.', detailOf(e));
+        }
+      });
+      li.append(a, del);
       list.appendChild(li);
     });
   }

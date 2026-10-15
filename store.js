@@ -395,6 +395,13 @@ const Store = (() => {
       });
       if (error) throw sbError(error);
     },
+    // 첫 화면의 내 청첩장 목록에서 하나를 지운다 (술과 건배는 DB에서 함께 지워진다)
+    async deleteInvitation(id) {
+      await sbRun(sb.from('invitations').delete().eq('id', id));
+      await fetchMyInvitations();
+      emit();
+    },
+
     async signOut() {
       await sb.auth.signOut();
       applySession(null);
