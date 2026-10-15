@@ -128,6 +128,7 @@ const Store = (() => {
   // Supabase 오류를 화면에서 쓰는 모양으로 바꾼다
   function sbError(error) {
     const err = new Error(error.message || 'supabase error');
+    err.detail = [error.code, error.message].filter(Boolean).join(' · ');
     err.code = error.code === '42501' || /row-level security|permission/i.test(error.message || '') ? 'forbidden' : 'failed';
     return err;
   }

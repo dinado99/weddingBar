@@ -197,6 +197,7 @@ canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: bloc
   position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
   background: var(--wood-dark); color: var(--paper); border: 3px solid var(--gold);
   padding: 8px 14px; font-size: 13px; z-index: 10; max-width: calc(100vw - 32px);
+  white-space: pre-line; overflow-wrap: anywhere;
 }
 
 @media (prefers-reduced-motion: reduce) {

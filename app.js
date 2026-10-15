@@ -34,13 +34,15 @@
   };
 
   // ───────── 공통 도우미 ─────────
-  function toast(text) {
+  // detail: 서버가 알려 준 오류 내용. 원인을 찾을 수 있게 함께 보여 준다.
+  function toast(text, detail) {
     const el = $('#toast');
-    el.textContent = text;
+    el.textContent = detail ? `${text}\n(${detail})` : text;
     el.hidden = false;
     clearTimeout(toast.timer);
-    toast.timer = setTimeout(() => { el.hidden = true; }, 2200);
+    toast.timer = setTimeout(() => { el.hidden = true; }, detail ? 8000 : 2200);
   }
+  const detailOf = (e) => (e && e.detail) || '';
 
   function weddingDate(inv) {
     const [y, m, d] = inv.date.split('-').map(Number);
@@ -455,7 +457,7 @@
       const code = e && e.code;
       toast(code === 'invalid_argument' ? '술을 올릴 권한이 없어요. 신랑·신부에게 참여 권한을 받아 주세요.'
         : code === 'auth' ? '하객 로그인이 꺼져 있어요. 신랑·신부에게 알려 주세요.'
-        : '술을 올리지 못했어요. 잠시 뒤 다시 시도해 주세요.');
+        : '술을 올리지 못했어요. 잠시 뒤 다시 시도해 주세요.', detailOf(e));
     }
   });
 
@@ -537,7 +539,7 @@
       render(Store.state);
       toast('청첩장을 저장했어요!');
     } catch (e) {
-      toast(e && e.code === 'forbidden' ? '저장할 권한이 없어요. 이메일로 다시 로그인해 주세요.' : '저장하지 못했어요. 잠시 뒤 다시 시도해 주세요.');
+      toast(e && e.code === 'forbidden' ? '저장할 권한이 없어요. 이메일로 다시 로그인해 주세요.' : '저장하지 못했어요. 잠시 뒤 다시 시도해 주세요.', detailOf(e));
     } finally {
       $('#setup-submit').disabled = false;
     }
@@ -574,7 +576,7 @@
       await Store.sendLoginLink(email);
       $('#login-sent').hidden = false;
     } catch (e) {
-      toast('로그인 메일을 보내지 못했어요. 주소를 확인하고 잠시 뒤 다시 시도해 주세요.');
+      toast('로그인 메일을 보내지 못했어요. 주소를 확인하고 잠시 뒤 다시 시도해 주세요.', detailOf(e));
     } finally {
       $('#login-submit').disabled = false;
     }
