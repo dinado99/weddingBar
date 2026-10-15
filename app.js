@@ -35,12 +35,12 @@
 
   // ───────── 공통 도우미 ─────────
   // detail: 서버가 알려 준 오류 내용. 원인을 찾을 수 있게 함께 보여 준다.
-  function toast(text, detail) {
+  function toast(text, detail, ms) {
     const el = $('#toast');
     el.textContent = detail ? `${text}\n(${detail})` : text;
     el.hidden = false;
     clearTimeout(toast.timer);
-    toast.timer = setTimeout(() => { el.hidden = true; }, detail ? 8000 : 2200);
+    toast.timer = setTimeout(() => { el.hidden = true; }, ms || (detail ? 8000 : 2200));
   }
   const detailOf = (e) => (e && e.detail) || '';
 
@@ -629,7 +629,7 @@
       const warn = Store.takeWarning();
       if (warn && warn.kind === 'columns-missing') {
         const names = warn.columns.map((c) => ({ bgm: '배경음악', region: '국내/해외 구분' }[c] || c)).join(', ');
-        toast(`청첩장은 저장했지만 ${names}은(는) 저장하지 못했어요. Supabase에 새 칸을 추가해 주세요.`);
+        toast(`청첩장은 저장했지만 ${names}은(는) 저장하지 못했어요. Supabase에 새 칸을 추가해 주세요.`, '', 6000);
         if (newId) { setTimeout(() => location.assign(Store.shareUrl(newId)), 4000); return; }
       }
       if (newId) { location.assign(Store.shareUrl(newId)); return; }

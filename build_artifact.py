@@ -23,10 +23,11 @@ def main(out_path):
     css = re.sub(r"url\('(fonts/[^']+\.woff2)'\)", font_data_uri, css)
 
     head = html.split("<!-- BUILD:HEAD-START -->")[1].split("<!-- BUILD:HEAD-END -->")[0]
-    head = re.sub(r'\s*<link rel="stylesheet" href="style.css">', "", head)
+    head = re.sub(r'\s*<link rel="stylesheet" href="style.css[^"]*">', "", head)
     body = html.split("<body>")[1].split("</body>")[0]
     scripts_block = body.split("<!-- BUILD:SCRIPTS-START -->")[1].split("<!-- BUILD:SCRIPTS-END -->")[0]
-    names = re.findall(r'<script src="([^"]+)"></script>', scripts_block)
+    # ?v=... 는 브라우저 캐시를 피하려고 붙인 것이라 파일 이름에서 뗀다
+    names = [n.split("?")[0] for n in re.findall(r'<script src="([^"]+)"></script>', scripts_block)]
     inline = "<script>window.__ARTIFACT__ = true;</script>\n" + "\n".join(
         "<script>\n" + (ROOT / n).read_text(encoding="utf-8") + "\n</script>" for n in names
     )
