@@ -584,7 +584,7 @@
     btn.hidden = $('#invite').hidden || !key;
     if (btn.hidden) return;
     const on = Chiptune.playing === key;
-    btn.textContent = on ? `♪ ${SONGS[key].title}` : '♪ 음악 켜기';
+    btn.textContent = on ? `♪ ${SONGS[key].title} · 끄기` : '♪ 배경음악 켜기';
     btn.setAttribute('aria-pressed', String(on));
     btn.setAttribute('aria-label', on ? '배경음악 끄기' : '배경음악 켜기');
   }
