@@ -713,6 +713,13 @@
 
   window.addEventListener('resize', () => { if (!$('#invite').hidden) resizeCabinet(); });
 
+  // 체험 모드: 안내 문구를 보이고, 계좌 칸 예시를 가짜 계좌로 바꾼다
+  if ((window.PIXEL_BAR_CONFIG || {}).trialMode) {
+    document.querySelectorAll('[data-trial]').forEach((el) => { el.hidden = false; });
+    $('#f-groomAccount').placeholder = '예시) 체험은행 000-0000-0000 신랑';
+    $('#f-brideAccount').placeholder = '예시) 체험은행 000-0000-0000 신부';
+  }
+
   Store.subscribe(render);
   Store.init();
   requestAnimationFrame(loop);

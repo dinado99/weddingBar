@@ -204,6 +204,7 @@ canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: bloc
   .pop { animation: none; }
 }
 .panel .link { color: var(--ink-soft); }
+.trial-note { margin: 0 0 12px; padding: 8px 10px; font-size: 13px; background: #fffaf0; border: 3px dashed var(--accent); color: var(--ink); }
 
 /* 배경음악 */
 .bgm-pick { display: flex; gap: 8px; }

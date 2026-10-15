@@ -5,4 +5,6 @@
 window.PIXEL_BAR_CONFIG = {
   supabaseUrl: 'https://vxjyzpkgavyoyaaxqgtv.supabase.co',
   supabaseAnonKey: 'sb_publishable_XfpP3dfqfCegdXKCtzsTPA_B64IpzFU',
+  // true면 "체험용이니 실제 정보 대신 예시를 넣어 달라"는 안내를 보여 준다 (사내 체험용)
+  trialMode: true,
 };
