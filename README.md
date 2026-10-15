@@ -19,6 +19,14 @@
 6. **GitHub Pages 켜기**: 배포용 저장소 [`wlsdk7245/weddingBar`](https://github.com/wlsdk7245/weddingBar) 의 Settings → Pages → **Deploy from a branch** → `main` / `/ (root)`.
    이후 `main`에 올라온 내용이 그대로 사이트가 됩니다. (사이트 주소: https://wlsdk7245.github.io/weddingBar/)
 
+### 배경음악 칸 추가 (2026-10-15 이전에 SQL을 실행했다면)
+
+SQL Editor에서 아래 한 줄을 실행하세요. 안 하면 청첩장은 저장되지만 배경음악은 저장되지 않습니다.
+
+```sql
+alter table public.invitations add column if not exists bgm text check (char_length(bgm) <= 20);
+```
+
 ### 쓰는 흐름
 
 1. 신랑·신부가 사이트 주소로 들어가 이메일을 넣으면 로그인 링크가 메일로 옵니다.
@@ -89,6 +97,7 @@ CSS, JS, 폰트를 한 파일에 넣은 HTML이 만들어집니다. 이 파일�
 | 메시지 보기 | 술병을 누르면 병이 흔들리며 "뽁" 소리와 함께 메시지가 한 글자씩 나옴 |
 | 숙성 메시지 | 밀랍으로 봉인되고 결혼 1주년에 열림 |
 | 건배 버튼 | 잔 부딪히는 효과음과 건배 횟수 |
+| 배경음악 | 청첩장 만들 때 8비트로 편곡한 클래식 10곡 중 하나를 고름. 하객이 화면을 처음 만지면 재생되고, 오른쪽 위 버튼으로 끄고 켬 |
 | 술 취향 통계 | 어떤 술이 몇 병 올라왔는지 막대그래프로 표시 |
 | 예식 안내 | 일시, 장소, 네이버 지도·카카오맵 링크, 계좌번호 복사 |
 | 관리 | 편집 권한자만: 술병 숨기기/보이기, 청첩장 정보 고치기, 전체 지우기 |
@@ -100,6 +109,7 @@ bar/
 ├── index.html   화면 구조
 ├── style.css    픽셀 스타일
 ├── sprites.js   술병 픽셀아트 (문자 격자로 그림, 이미지 파일 없음)
+├── music.js     8비트 배경음악 10곡과 재생기 (음원 파일 없음)
 ├── config.js    Supabase 연결 정보 (비우면 서버 없이 동작)
 ├── store.js     데이터 저장 (Supabase / 아티팩트 공유 DB / 브라우저 localStorage / 예시)
 ├── supabase/schema.sql  Supabase 표와 권한 규칙

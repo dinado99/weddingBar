@@ -3,7 +3,7 @@
 
   const DEFAULT_GREETING = '저희 두 사람의 술장에 축하주 한 병씩 채워 주세요!\n함께 건배할 날을 기다릴게요. 🥂';
   const SWATCHES = ['#3fa66b', '#8a4b1f', '#6b1430', '#24452f', '#c47a1c', '#efeadc', '#e86a92', '#4a7bd1', '#f2c14e', '#7d5ba6'];
-  const SETUP_FIELDS = ['groom', 'bride', 'date', 'time', 'venue', 'address', 'groomAccount', 'brideAccount', 'greeting', 'favorite'];
+  const SETUP_FIELDS = ['groom', 'bride', 'date', 'time', 'venue', 'address', 'groomAccount', 'brideAccount', 'greeting', 'favorite', 'bgm'];
 
   let S = Store.state; // 마지막으로 받은 데이터
   let editing = false; // 신랑·신부가 청첩장 정보를 고치는 중
@@ -225,6 +225,9 @@
   // ───────── 화면 고르기 ─────────
   function show(id) {
     ['#loading', '#home', '#closed', '#setup', '#invite'].forEach((s) => { $(s).hidden = s !== id; });
+    // 청첩장 화면을 떠나면 배경음악을 끈다 (만들기 화면의 미리 듣기는 그대로 둔다)
+    if (id !== '#invite' && !(id === '#setup' && previewing)) { Chiptune.stop(); previewing = false; renderPreviewButton(); }
+    renderBgmButton();
   }
 
   function showClosed(text) {
@@ -256,6 +259,9 @@
   function renderInvite() {
     const inv = S.invitation;
     $('#demo-banner').hidden = S.mode !== 'demo';
+    // 신랑·신부가 배경음악을 바꾸면 듣고 있던 하객의 음악도 바꾼다
+    if (Chiptune.playing && Chiptune.playing !== currentBgm()) { Chiptune.stop(); if (currentBgm()) Chiptune.play(currentBgm()); }
+    renderBgmButton();
     $('#hero-names').textContent = `${inv.groom} ♥ ${inv.bride}`;
     $('#hero-date').textContent = formatWhen(inv);
     $('#hero-dday').textContent = dday(inv);
@@ -515,10 +521,19 @@
         sel.appendChild(o);
       });
     }
+    const bgmSel = $('#f-bgm');
+    if (!bgmSel.options.length) {
+      [['', '없음'], ...Object.entries(SONGS).map(([key, s]) => [key, `${s.title} · ${s.composer}`])].forEach(([key, label]) => {
+        const o = document.createElement('option');
+        o.value = key; o.textContent = label;
+        bgmSel.appendChild(o);
+      });
+    }
     const inv = S.invitation;
     const f = $('#setup-form');
     f.reset();
     sel.value = 'wine';
+    bgmSel.value = inv ? '' : 'canon';
     if (inv) SETUP_FIELDS.forEach((k) => { if (inv[k] != null) $('#f-' + k).value = inv[k]; });
     $('#setup-title').textContent = inv ? '🍶 청첩장 정보 고치기' : '🍶 우리 술장 청첩장 만들기';
     $('#setup-submit').textContent = inv ? '고친 내용 저장하기' : '청첩장 만들기';
@@ -532,8 +547,13 @@
     const data = {};
     SETUP_FIELDS.forEach((k) => { data[k] = $('#f-' + k).value.trim(); });
     $('#setup-submit').disabled = true;
+    stopPreview();
     try {
       const newId = await Store.saveInvitation(data);
+      if (Store.takeWarning() === 'bgm-column-missing') {
+        toast('청첩장은 저장했지만 배경음악은 저장하지 못했어요. Supabase에 bgm 칸을 추가해 주세요.');
+        if (newId) { setTimeout(() => location.assign(Store.shareUrl(newId)), 4000); return; }
+      }
       if (newId) { location.assign(Store.shareUrl(newId)); return; }
       editing = false;
       render(Store.state);
@@ -544,7 +564,77 @@
       $('#setup-submit').disabled = false;
     }
   });
-  $('#setup-cancel').addEventListener('click', () => { editing = false; creating = false; render(Store.state); });
+  $('#setup-cancel').addEventListener('click', () => { stopPreview(); editing = false; creating = false; render(Store.state); });
+
+  // ───────── 배경음악 ─────────
+  const BGM_MUTE_KEY = 'pixel-bar-bgm-muted';
+  let previewing = false;   // 만들기 화면에서 미리 듣는 중
+  let pausedByHide = null;  // 다른 앱으로 나가서 잠시 멈춘 곡
+
+  const bgmMuted = () => { try { return localStorage.getItem(BGM_MUTE_KEY) === '1'; } catch (e) { return false; } };
+  const setBgmMuted = (v) => { try { localStorage.setItem(BGM_MUTE_KEY, v ? '1' : '0'); } catch (e) { /* 무시 */ } };
+  function currentBgm() {
+    const key = S.invitation && S.invitation.bgm;
+    return key && SONGS[key] ? key : null;
+  }
+
+  function renderBgmButton() {
+    const btn = $('#bgm-btn');
+    const key = currentBgm();
+    btn.hidden = $('#invite').hidden || !key;
+    if (btn.hidden) return;
+    const on = Chiptune.playing === key;
+    btn.textContent = on ? `♪ ${SONGS[key].title}` : '♪ 음악 켜기';
+    btn.setAttribute('aria-pressed', String(on));
+    btn.setAttribute('aria-label', on ? '배경음악 끄기' : '배경음악 켜기');
+  }
+
+  function startBgm() {
+    const key = currentBgm();
+    if (key && Chiptune.playing !== key) Chiptune.play(key);
+    renderBgmButton();
+  }
+
+  $('#bgm-btn').addEventListener('click', () => {
+    if (Chiptune.playing) { Chiptune.stop(); setBgmMuted(true); } else { setBgmMuted(false); startBgm(); }
+    renderBgmButton();
+  });
+
+  // 브라우저는 사람이 화면을 한 번 만진 뒤에만 소리를 낼 수 있다. 그래서 첫 터치에 음악을 켠다.
+  document.addEventListener('pointerdown', (ev) => {
+    if (ev.target.closest && ev.target.closest('#bgm-btn')) return;
+    if (!$('#invite').hidden && currentBgm() && !bgmMuted() && !Chiptune.playing) startBgm();
+  }, true);
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      if (Chiptune.playing) { pausedByHide = Chiptune.playing; Chiptune.stop(); }
+    } else if (pausedByHide) {
+      Chiptune.play(pausedByHide); pausedByHide = null;
+      renderBgmButton();
+    }
+  });
+
+  function renderPreviewButton() {
+    $('#bgm-preview').textContent = previewing ? '■ 멈추기' : '▶ 미리 듣기';
+  }
+  function stopPreview() {
+    if (previewing) Chiptune.stop();
+    previewing = false;
+    renderPreviewButton();
+  }
+  $('#bgm-preview').addEventListener('click', () => {
+    if (previewing) { stopPreview(); return; }
+    const key = $('#f-bgm').value;
+    if (!key) { toast('배경음악을 먼저 골라 주세요.'); return; }
+    previewing = Chiptune.play(key);
+    renderPreviewButton();
+  });
+  $('#f-bgm').addEventListener('change', () => {
+    if (!previewing) return;
+    const key = $('#f-bgm').value;
+    if (key) Chiptune.play(key); else stopPreview();
+  });
 
   // ───────── Supabase 첫 화면 ─────────
   function renderHome() {
@@ -608,7 +698,7 @@
       groom: '김철수', bride: '이영희', date: iso, time: '12:30',
       venue: '픽셀웨딩홀 3층 그랜드홀', address: '서울특별시 중구 세종대로 110',
       groomAccount: '픽셀은행 123-456-7890 김철수', brideAccount: '도트은행 098-765-4321 이영희',
-      greeting: DEFAULT_GREETING, favorite: 'wine', hidden: [],
+      greeting: DEFAULT_GREETING, favorite: 'wine', bgm: 'canon', hidden: [],
     }, demo);
     window.scrollTo(0, 0);
   }

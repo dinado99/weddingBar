@@ -72,6 +72,12 @@
           <label>두 사람이 좋아하는 술
             <select id="f-favorite" name="favorite"></select>
           </label>
+          <label>배경음악 <small>(8비트로 편곡한 클래식)</small>
+            <span class="bgm-pick">
+              <select id="f-bgm" name="bgm"></select>
+              <button class="btn" type="button" id="bgm-preview">▶ 미리 듣기</button>
+            </span>
+          </label>
           <button class="btn primary" type="submit" id="setup-submit">청첩장 만들기</button>
           <button class="btn ghost" type="button" id="setup-cancel" hidden>수정 취소</button>
           <button class="btn ghost" type="button" id="demo-btn">예시 화면 먼저 둘러보기</button>
@@ -182,10 +188,12 @@
     </div>
   </dialog>
 
+  <button class="bgm-btn" type="button" id="bgm-btn" aria-pressed="false" hidden>♪ 음악 켜기</button>
   <div id="toast" class="toast" role="status" hidden></div>
 
   <!-- BUILD:SCRIPTS-START -->
   <script src="sprites.js"></script>
+  <script src="music.js"></script>
   <script src="store.js"></script>
   <script src="app.js"></script>
   <!-- BUILD:SCRIPTS-END -->

@@ -204,3 +204,18 @@ canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: bloc
   .pop { animation: none; }
 }
 .panel .link { color: var(--ink-soft); }
+
+/* 배경음악 */
+.bgm-pick { display: flex; gap: 8px; }
+.bgm-pick select { flex: 1; min-width: 0; }
+.bgm-pick .btn { flex-shrink: 0; padding: 6px 10px; font-size: 13px; }
+.bgm-btn {
+  position: fixed; z-index: 5;
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  right: calc(10px + env(safe-area-inset-right, 0px));
+  max-width: 60vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font: inherit; font-size: 12px; font-weight: 700;
+  color: var(--paper); background: var(--wood-dark);
+  border: 3px solid var(--gold); padding: 6px 10px; cursor: pointer;
+}
+.bgm-btn[aria-pressed="true"] { background: var(--wood); }

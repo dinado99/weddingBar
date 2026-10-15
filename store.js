@@ -108,7 +108,7 @@ const Store = (() => {
     date: r.wedding_date, time: String(r.wedding_time || '12:00').slice(0, 5),
     venue: r.venue, address: r.address || '',
     groomAccount: r.groom_account || '', brideAccount: r.bride_account || '',
-    greeting: r.greeting || '', favorite: r.favorite || 'wine',
+    greeting: r.greeting || '', favorite: r.favorite || 'wine', bgm: r.bgm || '',
     hidden: r.hidden || [], ownerId: r.owner_id,
   });
   const toInviteRow = (inv) => ({
@@ -117,7 +117,24 @@ const Store = (() => {
     venue: inv.venue, address: inv.address || null,
     groom_account: inv.groomAccount || null, bride_account: inv.brideAccount || null,
     greeting: inv.greeting || null, favorite: inv.favorite || 'wine',
+    bgm: inv.bgm || null,
   });
+
+  // 배경음악 칸(bgm)이 없는 예전 DB면 그 칸만 빼고 다시 저장한다
+  let warning = null;
+  const missingBgmColumn = (e) => /bgm/.test((e && e.message) || '');
+  async function writeInvitation(write) {
+    try { return await write(true); } catch (e) {
+      if (!missingBgmColumn(e)) throw e;
+      warning = 'bgm-column-missing';
+      return write(false);
+    }
+  }
+  const inviteRow = (inv, withBgm) => {
+    const row = toInviteRow(inv);
+    if (!withBgm) delete row.bgm;
+    return row;
+  };
   const fromEntryRow = (r) => ({
     id: r.id, authorId: r.author_id,
     drink: r.drink, color: r.color, ribbon: r.ribbon, capsule: r.capsule,
@@ -274,6 +291,9 @@ const Store = (() => {
       return null;
     },
 
+    // 저장하면서 생긴 알림을 한 번만 꺼내 간다 (예: 'bgm-column-missing')
+    takeWarning() { const w = warning; warning = null; return w; },
+
     // 하객에게 보낼 링크 (Supabase 모드에서만 청첩장마다 다르다)
     shareUrl(id = inviteId) {
       return id ? `${location.origin}${location.pathname}?i=${id}` : location.href;
@@ -283,11 +303,11 @@ const Store = (() => {
     async saveInvitation(inv) {
       if (isSb()) {
         if (mode === 'sb' && live.invitation) {
-          await sbRun(sb.from('invitations').update(toInviteRow(inv)).eq('id', inviteId));
+          await writeInvitation((withBgm) => sbRun(sb.from('invitations').update(inviteRow(inv, withBgm)).eq('id', inviteId)));
           await fetchInvitation(); emit();
           return null;
         }
-        const row = await sbRun(sb.from('invitations').insert(toInviteRow(inv)).select('id').single());
+        const row = await writeInvitation((withBgm) => sbRun(sb.from('invitations').insert(inviteRow(inv, withBgm)).select('id').single()));
         return row.id;
       }
       const body = { ...inv, hidden: (cur().invitation && cur().invitation.hidden) || [] };
