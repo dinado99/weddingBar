@@ -421,7 +421,18 @@
     drawBottle(c, entry.drink, { x: 2, y: h + 1, color: entry.color, ribbon: entry.ribbon, sealed: entry.capsule });
   }
 
+  // 메시지 창을 비운다. 열 때와 닫을 때 모두 불러서, 앞서 본 술병의 글이 남지 않게 한다.
+  let typeDelay = null;
+  function resetMessage() {
+    clearTimeout(typeDelay);
+    clearInterval(typing);
+    const msg = $('#view-message');
+    msg.textContent = '';
+    msg.onclick = null;
+  }
+
   function openBottle(entry) {
+    resetMessage();
     const inv = S.invitation;
     const cv = $('#view-bottle');
     paintBottle(cv, entry);
@@ -435,16 +446,17 @@
     $('#view-dialog').showModal();
     if (entry.capsule && new Date() < capsuleOpenDate(inv)) {
       const d = capsuleOpenDate(inv);
-      clearInterval(typing);
-      msg.onclick = null;
       msg.textContent = `🕰️ 숙성 중인 메시지예요.\n${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일, 결혼 1주년에 개봉됩니다.`;
       sfx.blip();
     } else {
       sfx.pop();
-      setTimeout(() => typeText(msg, String(entry.message || '')), 350);
+      typeDelay = setTimeout(() => typeText(msg, String(entry.message || '')), 350);
     }
   }
-  $('#view-close').addEventListener('click', () => { clearInterval(typing); $('#view-dialog').close(); });
+  $('#view-close').addEventListener('click', () => $('#view-dialog').close());
+  // 닫기 버튼, 뒤로 가기, 바깥 누르기 등 어떤 방법으로 닫혀도 글을 지운다
+  // (close 알림은 조금 늦게 오므로, 그사이 다른 술병을 열었으면 건드리지 않는다)
+  $('#view-dialog').addEventListener('close', () => { if (!$('#view-dialog').open) resetMessage(); });
 
   // ───────── 술 올리기 ─────────
   const draft = { drink: 'soju', color: null };
