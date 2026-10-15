@@ -93,7 +93,15 @@ canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: bloc
 .form textarea { resize: vertical; }
 .form label.check { flex-direction: row; align-items: center; gap: 8px; font-weight: 400; }
 .form label.check input { width: 20px; height: 20px; accent-color: var(--wood); }
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.row2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.row2 > label { min-width: 0; }
+/* 아이폰 사파리는 날짜·시간 칸에 고유한 최소 너비와 모양을 줘서 칸이 삐져나온다. 다른 칸과 똑같이 맞춘다. */
+.form input { min-width: 0; max-width: 100%; }
+.form input[type="date"], .form input[type="time"] {
+  -webkit-appearance: none; appearance: none;
+  display: block; height: calc(1.6em + 22px); line-height: 1.6; text-align: left;
+}
+.form input::-webkit-date-and-time-value { text-align: left; }
 .row-btns { display: flex; gap: 8px; justify-content: flex-end; }
 
 /* 간판 */
