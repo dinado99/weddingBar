@@ -45,7 +45,7 @@
     <!-- 아직 청첩장이 없거나 볼 수 없을 때 -->
     <section id="closed" class="screen" hidden>
       <div class="panel">
-        <h1 class="title">🍶 아직 술장 문이 닫혀 있어요</h1>
+        <h1 class="title" id="closed-title">🍶 아직 술장 문이 닫혀 있어요</h1>
         <p class="hint" id="closed-text">신랑·신부가 청첩장을 준비하고 있어요. 조금 뒤에 다시 들러 주세요.</p>
         <button class="btn" type="button" id="closed-demo">예시 화면 둘러보기</button>
       </div>
@@ -96,11 +96,12 @@
 
       <header class="hero">
         <div class="sign">
-          <span class="sign-small">WEDDING BAR</span>
+          <span class="sign-small" id="sign-small">WEDDING BAR</span>
           <span id="hero-names" class="sign-names"></span>
         </div>
         <p id="hero-date" class="hero-date"></p>
         <p id="hero-dday" class="dday"></p>
+        <p id="hero-note" class="hero-note" hidden></p>
       </header>
 
       <div class="cabinet-wrap">
@@ -126,14 +127,16 @@
       </section>
 
       <section class="panel info">
-        <h2>예식 안내</h2>
-        <dl>
-          <dt>일시</dt><dd id="info-when"></dd>
-          <dt>장소</dt><dd id="info-venue"></dd>
-        </dl>
-        <div class="map-links" id="map-links"></div>
-        <h2>마음 전하실 곳</h2>
-        <div id="accounts"></div>
+        <details id="info-fold" open>
+          <summary><h2>예식 안내</h2><span class="fold-hint">펼치기</span></summary>
+          <dl>
+            <dt>일시</dt><dd id="info-when"></dd>
+            <dt>장소</dt><dd id="info-venue"></dd>
+          </dl>
+          <div class="map-links" id="map-links"></div>
+          <h2>마음 전하실 곳</h2>
+          <div id="accounts"></div>
+        </details>
       </section>
 
       <footer class="foot">
@@ -191,6 +194,7 @@
     </div>
   </dialog>
 
+  <canvas id="petals" class="petals" aria-hidden="true" hidden></canvas>
   <div id="toast" class="toast" role="status" hidden></div>
 
   <!-- BUILD:SCRIPTS-START -->

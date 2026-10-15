@@ -230,7 +230,8 @@
     renderBgmButton();
   }
 
-  function showClosed(text) {
+  function showClosed(text, title = '🍶 아직 술장 문이 닫혀 있어요') {
+    $('#closed-title').textContent = title;
     $('#closed-text').textContent = text;
     show('#closed');
   }
@@ -239,7 +240,7 @@
     S = state;
     if (S.mode === 'loading') return show('#loading');
     if (S.mode === 'nodb') return showClosed('claude.ai에 로그인해야 술장을 볼 수 있어요. 로그인한 뒤 다시 열어 주세요.');
-    if (S.mode === 'sb-notfound') return showClosed('청첩장을 찾을 수 없어요. 받은 링크가 맞는지 다시 확인해 주세요.');
+    if (S.mode === 'sb-notfound') return showClosed('청첩장이 지워졌거나 링크가 잘못됐어요. 받은 링크를 다시 확인해 주세요.', '🍶 이 술장은 문을 닫았어요');
     if (S.mode === 'sb-error') return showClosed('서버에 연결하지 못했어요. 잠시 뒤 새로고침해 주세요.');
     if (S.mode === 'sb-home') {
       if (creating && S.home.email) { if ($('#setup').hidden) openSetup(); return; }
@@ -249,8 +250,7 @@
     }
     if (editing || !S.invitation) {
       if (S.isAdmin) { if ($('#setup').hidden) openSetup(); return; }
-      $('#closed-text').textContent = '신랑·신부가 청첩장을 준비하고 있어요. 조금 뒤에 다시 들러 주세요.';
-      return show('#closed');
+      return showClosed('신랑·신부가 청첩장을 준비하고 있어요. 조금 뒤에 다시 들러 주세요.');
     }
     show('#invite');
     renderInvite();
@@ -272,7 +272,19 @@
     $('#add-btn').hidden = !S.canWrite;
     $('#cheers-btn').hidden = !S.canWrite;
     $('#readonly-note').hidden = S.canWrite;
-    $('#add-btn').textContent = Store.myEntry() ? '🍾 내 술 다시 꾸미기' : '🍾 술 한 병 올리기';
+    const phase = phaseOf(inv);
+    $('#add-btn').textContent = Store.myEntry() ? '🍾 내 술 다시 꾸미기' : phase === 'after' ? '🍾 늦은 축하 올리기' : '🍾 술 한 병 올리기';
+    $('#sign-small').textContent = phase === 'day' ? '오늘 결혼해요!' : phase === 'after' ? '와 주셔서 고마워요' : 'WEDDING BAR';
+    $('#sign-small').classList.toggle('ko', phase !== 'before');
+    if (PHASE_PREVIEW) $('#hero-dday').textContent = phase === 'day' ? 'D-DAY 🎉' : phase === 'after' ? 'D+1' : dday(inv);
+    const note = $('#hero-note');
+    note.hidden = phase === 'before';
+    note.textContent = phase === 'day'
+      ? '오늘 두 사람이 결혼해요. 축하주 한 병 올려 주세요!'
+      : '함께 축하해 주셔서 고마워요. 늦은 축하도 언제든 환영이에요.';
+    // 예식이 끝나면 지도와 계좌 안내는 접어 둔다 (처음 그릴 때만 정하고, 하객이 펼친 건 그대로 둔다)
+    if (lastPhase !== phase) { $('#info-fold').open = phase !== 'after'; lastPhase = phase; }
+    setPetals(phase === 'day');
     $('#share-panel').hidden = !(S.mode === 'sb' && S.isAdmin);
     $('#share-url').textContent = Store.shareUrl();
 
@@ -308,6 +320,53 @@
     resizeCabinet();
     renderStats();
     if (!$('#admin-dialog').hidden && $('#admin-dialog').open) renderAdminList();
+  }
+
+  // ───────── 예식 전 / 당일 / 후 ─────────
+  // 주소 끝에 ?phase=day 또는 ?phase=after 를 붙이면 그날 화면을 미리 볼 수 있다
+  const PHASE_PREVIEW = new URLSearchParams(location.search).get('phase');
+  let lastPhase = null;
+  function phaseOf(inv) {
+    if (PHASE_PREVIEW === 'before' || PHASE_PREVIEW === 'day' || PHASE_PREVIEW === 'after') return PHASE_PREVIEW;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const day = weddingDate(inv); day.setHours(0, 0, 0, 0);
+    return today < day ? 'before' : today > day ? 'after' : 'day';
+  }
+
+  // 결혼식 당일에 화면 위로 픽셀 꽃잎이 날린다
+  const petalCanvas = $('#petals');
+  const PETAL_COLORS = ['#ff7aa8', '#ffd1e0', '#fffaf0', '#f2c14e'];
+  let petals = [];
+  let petalsOn = false;
+  function setPetals(on) {
+    if (reduceMotion) on = false;
+    if (on === petalsOn) return;
+    petalsOn = on;
+    petalCanvas.hidden = !on;
+    if (!on) return;
+    const W = 120, H = Math.round(120 * innerHeight / Math.max(1, innerWidth));
+    petalCanvas.width = W; petalCanvas.height = H;
+    petals = Array.from({ length: 28 }, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      vy: 0.15 + Math.random() * 0.25, sway: Math.random() * Math.PI * 2,
+      c: PETAL_COLORS[Math.floor(Math.random() * PETAL_COLORS.length)],
+    }));
+    requestAnimationFrame(petalLoop);
+  }
+  function petalLoop() {
+    if (!petalsOn || $('#invite').hidden) { petalCanvas.hidden = true; petalsOn = false; return; }
+    const g = petalCanvas.getContext('2d');
+    const W = petalCanvas.width, H = petalCanvas.height;
+    g.clearRect(0, 0, W, H);
+    petals.forEach((p) => {
+      p.y += p.vy; p.sway += 0.03;
+      const x = Math.round(p.x + Math.sin(p.sway) * 3);
+      if (p.y > H + 2) { p.y = -2; p.x = Math.random() * W; }
+      g.fillStyle = p.c;
+      g.fillRect(x, Math.round(p.y), 2, 1);
+      g.fillRect(x + (Math.sin(p.sway) > 0 ? 1 : 0), Math.round(p.y) + 1, 1, 1);
+    });
+    requestAnimationFrame(petalLoop);
   }
 
   function renderStats() {
