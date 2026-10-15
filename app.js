@@ -666,7 +666,12 @@
       await Store.sendLoginLink(email);
       $('#login-sent').hidden = false;
     } catch (e) {
-      toast('로그인 메일을 보내지 못했어요. 주소를 확인하고 잠시 뒤 다시 시도해 주세요.', detailOf(e));
+      if (/rate_limit|rate limit/i.test(detailOf(e))) {
+        // Supabase 기본 메일은 한 시간에 몇 통만 보낼 수 있다
+        toast('로그인 메일을 너무 자주 요청했어요. 이미 받은 메일의 링크를 누르거나, 한 시간쯤 뒤에 다시 시도해 주세요.');
+      } else {
+        toast('로그인 메일을 보내지 못했어요. 주소를 확인하고 잠시 뒤 다시 시도해 주세요.', detailOf(e));
+      }
     } finally {
       $('#login-submit').disabled = false;
     }
