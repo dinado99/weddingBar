@@ -21,12 +21,14 @@ create table if not exists public.invitations (
   greeting      text check (char_length(greeting) <= 300),
   favorite      text not null default 'wine',
   bgm           text check (char_length(bgm) <= 20),
+  region        text not null default 'domestic' check (region in ('domestic','overseas')),
   hidden        uuid[] not null default '{}',
   created_at    timestamptz not null default now()
 );
 
 -- 예전에 만든 DB에 배경음악 칸 추가 (이미 있으면 그냥 넘어간다)
 alter table public.invitations add column if not exists bgm text check (char_length(bgm) <= 20);
+alter table public.invitations add column if not exists region text not null default 'domestic' check (region in ('domestic','overseas'));
 
 create table if not exists public.entries (
   id            uuid primary key default gen_random_uuid(),

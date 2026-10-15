@@ -19,12 +19,13 @@
 6. **GitHub Pages 켜기**: 배포용 저장소 [`wlsdk7245/weddingBar`](https://github.com/wlsdk7245/weddingBar) 의 Settings → Pages → **Deploy from a branch** → `main` / `/ (root)`.
    이후 `main`에 올라온 내용이 그대로 사이트가 됩니다. (사이트 주소: https://wlsdk7245.github.io/weddingBar/)
 
-### 배경음악 칸 추가 (2026-10-15 이전에 SQL을 실행했다면)
+### 나중에 추가한 칸 (예전에 SQL을 실행했다면)
 
-SQL Editor에서 아래 한 줄을 실행하세요. 안 하면 청첩장은 저장되지만 배경음악은 저장되지 않습니다.
+SQL Editor에서 아래 두 줄을 실행하세요. 안 하면 청첩장은 저장되지만 배경음악과 국내/해외 구분은 저장되지 않습니다.
 
 ```sql
 alter table public.invitations add column if not exists bgm text check (char_length(bgm) <= 20);
+alter table public.invitations add column if not exists region text not null default 'domestic' check (region in ('domestic','overseas'));
 ```
 
 ### 쓰는 흐름
@@ -99,7 +100,7 @@ CSS, JS, 폰트를 한 파일에 넣은 HTML이 만들어집니다. 이 파일�
 | 건배 버튼 | 잔 부딪히는 효과음과 건배 횟수 |
 | 배경음악 | 청첩장 만들 때 8비트로 편곡한 클래식 10곡 중 하나를 고름. 하객이 화면을 처음 만지면 재생되고, 오른쪽 위 버튼으로 끄고 켬 |
 | 술 취향 통계 | 어떤 술이 몇 병 올라왔는지 막대그래프로 표시 |
-| 예식 안내 | 일시, 장소, 네이버 지도·카카오맵 링크, 계좌번호 복사 |
+| 예식 안내 | 일시, 장소, 계좌번호 복사. 지도는 국내면 네이버 지도·카카오맵, 해외면 구글 지도 |
 | 관리 | 편집 권한자만: 술병 숨기기/보이기, 청첩장 정보 고치기, 전체 지우기 |
 
 ## 파일 구성

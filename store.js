@@ -109,6 +109,7 @@ const Store = (() => {
     venue: r.venue, address: r.address || '',
     groomAccount: r.groom_account || '', brideAccount: r.bride_account || '',
     greeting: r.greeting || '', favorite: r.favorite || 'wine', bgm: r.bgm || '',
+    region: r.region === 'overseas' ? 'overseas' : 'domestic',
     hidden: r.hidden || [], ownerId: r.owner_id,
   });
   const toInviteRow = (inv) => ({
@@ -118,21 +119,26 @@ const Store = (() => {
     groom_account: inv.groomAccount || null, bride_account: inv.brideAccount || null,
     greeting: inv.greeting || null, favorite: inv.favorite || 'wine',
     bgm: inv.bgm || null,
+    region: inv.region === 'overseas' ? 'overseas' : 'domestic',
   });
 
-  // 배경음악 칸(bgm)이 없는 예전 DB면 그 칸만 빼고 다시 저장한다
+  // 나중에 추가한 칸(배경음악, 국내/해외)이 없는 예전 DB면 그 칸만 빼고 다시 저장한다
+  const OPTIONAL_COLUMNS = ['bgm', 'region'];
   let warning = null;
-  const missingBgmColumn = (e) => /bgm/.test((e && e.message) || '');
   async function writeInvitation(write) {
-    try { return await write(true); } catch (e) {
-      if (!missingBgmColumn(e)) throw e;
-      warning = 'bgm-column-missing';
-      return write(false);
+    const skip = new Set();
+    for (;;) {
+      try { return await write(skip); } catch (e) {
+        const col = OPTIONAL_COLUMNS.find((c) => !skip.has(c) && new RegExp(`\\b${c}\\b`).test((e && e.message) || ''));
+        if (!col) throw e;
+        skip.add(col);
+        warning = { kind: 'columns-missing', columns: [...skip] };
+      }
     }
   }
-  const inviteRow = (inv, withBgm) => {
+  const inviteRow = (inv, skip) => {
     const row = toInviteRow(inv);
-    if (!withBgm) delete row.bgm;
+    skip.forEach((c) => delete row[c]);
     return row;
   };
   const fromEntryRow = (r) => ({
@@ -291,7 +297,7 @@ const Store = (() => {
       return null;
     },
 
-    // 저장하면서 생긴 알림을 한 번만 꺼내 간다 (예: 'bgm-column-missing')
+    // 저장하면서 생긴 알림을 한 번만 꺼내 간다 (예: { kind: 'columns-missing', columns: ['bgm'] })
     takeWarning() { const w = warning; warning = null; return w; },
 
     // 하객에게 보낼 링크 (Supabase 모드에서만 청첩장마다 다르다)
@@ -303,11 +309,11 @@ const Store = (() => {
     async saveInvitation(inv) {
       if (isSb()) {
         if (mode === 'sb' && live.invitation) {
-          await writeInvitation((withBgm) => sbRun(sb.from('invitations').update(inviteRow(inv, withBgm)).eq('id', inviteId)));
+          await writeInvitation((skip) => sbRun(sb.from('invitations').update(inviteRow(inv, skip)).eq('id', inviteId)));
           await fetchInvitation(); emit();
           return null;
         }
-        const row = await writeInvitation((withBgm) => sbRun(sb.from('invitations').insert(inviteRow(inv, withBgm)).select('id').single()));
+        const row = await writeInvitation((skip) => sbRun(sb.from('invitations').insert(inviteRow(inv, skip)).select('id').single()));
         return row.id;
       }
       const body = { ...inv, hidden: (cur().invitation && cur().invitation.hidden) || [] };

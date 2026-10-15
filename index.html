@@ -66,6 +66,12 @@
             <label>예식 날짜<input id="f-date" name="date" type="date" required></label>
             <label>예식 시간<input id="f-time" name="time" type="time" required value="12:00"></label>
           </div>
+          <label>예식 장소
+            <select id="f-region" name="region">
+              <option value="domestic">국내 (네이버 지도·카카오맵)</option>
+              <option value="overseas">해외 (구글 지도)</option>
+            </select>
+          </label>
           <label>예식장 이름<input id="f-venue" name="venue" required maxlength="40" placeholder="○○웨딩홀 3층 그랜드홀"></label>
           <label>주소<input id="f-address" name="address" maxlength="80" placeholder="서울시 ○○구 ○○로 123"></label>
           <label>신랑측 마음 전하실 곳<input id="f-groomAccount" name="groomAccount" maxlength="60" placeholder="○○은행 123-456-7890 김철수"></label>

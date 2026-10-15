@@ -3,7 +3,7 @@
 
   const DEFAULT_GREETING = '저희 두 사람의 술장에 축하주 한 병씩 채워 주세요!\n함께 건배할 날을 기다릴게요. 🥂';
   const SWATCHES = ['#3fa66b', '#8a4b1f', '#6b1430', '#24452f', '#c47a1c', '#efeadc', '#e86a92', '#4a7bd1', '#f2c14e', '#7d5ba6'];
-  const SETUP_FIELDS = ['groom', 'bride', 'date', 'time', 'venue', 'address', 'groomAccount', 'brideAccount', 'greeting', 'favorite', 'bgm'];
+  const SETUP_FIELDS = ['groom', 'bride', 'date', 'time', 'venue', 'address', 'groomAccount', 'brideAccount', 'greeting', 'favorite', 'bgm', 'region'];
 
   let S = Store.state; // 마지막으로 받은 데이터
   let editing = false; // 신랑·신부가 청첩장 정보를 고치는 중
@@ -291,7 +291,11 @@
     const maps = $('#map-links');
     maps.replaceChildren();
     const q = encodeURIComponent(inv.address || inv.venue);
-    [['네이버 지도', `https://map.naver.com/p/search/${q}`], ['카카오맵', `https://map.kakao.com/link/search/${q}`]].forEach(([label, href]) => {
+    // 해외 예식이면 구글 지도, 국내면 네이버 지도와 카카오맵
+    const mapLinks = inv.region === 'overseas'
+      ? [['구글 지도', `https://www.google.com/maps/search/?api=1&query=${q}`]]
+      : [['네이버 지도', `https://map.naver.com/p/search/${q}`], ['카카오맵', `https://map.kakao.com/link/search/${q}`]];
+    mapLinks.forEach(([label, href]) => {
       const a = document.createElement('a');
       a.className = 'btn'; a.href = href; a.target = '_blank'; a.rel = 'noopener'; a.textContent = label;
       maps.appendChild(a);
@@ -606,6 +610,7 @@
     sel.value = 'wine';
     bgmSel.value = inv ? '' : 'canon';
     if (inv) SETUP_FIELDS.forEach((k) => { if (inv[k] != null) $('#f-' + k).value = inv[k]; });
+    updateAddressHint();
     $('#setup-title').textContent = inv ? '🍶 청첩장 정보 고치기' : '🍶 우리 술장 청첩장 만들기';
     $('#setup-submit').textContent = inv ? '고친 내용 저장하기' : '청첩장 만들기';
     $('#setup-cancel').hidden = !inv && !creating;
@@ -621,8 +626,10 @@
     stopPreview();
     try {
       const newId = await Store.saveInvitation(data);
-      if (Store.takeWarning() === 'bgm-column-missing') {
-        toast('청첩장은 저장했지만 배경음악은 저장하지 못했어요. Supabase에 bgm 칸을 추가해 주세요.');
+      const warn = Store.takeWarning();
+      if (warn && warn.kind === 'columns-missing') {
+        const names = warn.columns.map((c) => ({ bgm: '배경음악', region: '국내/해외 구분' }[c] || c)).join(', ');
+        toast(`청첩장은 저장했지만 ${names}은(는) 저장하지 못했어요. Supabase에 새 칸을 추가해 주세요.`);
         if (newId) { setTimeout(() => location.assign(Store.shareUrl(newId)), 4000); return; }
       }
       if (newId) { location.assign(Store.shareUrl(newId)); return; }
@@ -802,6 +809,13 @@
   $('#demo-exit').addEventListener('click', () => { bottles = []; Store.stopDemo(); window.scrollTo(0, 0); });
 
   window.addEventListener('resize', () => { if (!$('#invite').hidden) resizeCabinet(); });
+
+  function updateAddressHint() {
+    const overseas = $('#f-region').value === 'overseas';
+    $('#f-address').placeholder = overseas ? '예) 1 Rue de Rivoli, 75001 Paris, France' : '서울시 ○○구 ○○로 123';
+    $('#f-venue').placeholder = overseas ? '예) Hôtel de Paris' : '○○웨딩홀 3층 그랜드홀';
+  }
+  $('#f-region').addEventListener('change', updateAddressHint);
 
   // 체험 모드: 안내 문구를 보이고, 계좌 칸 예시를 가짜 계좌로 바꾼다
   if ((window.PIXEL_BAR_CONFIG || {}).trialMode) {
