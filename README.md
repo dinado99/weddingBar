@@ -12,12 +12,12 @@
 2. **표 만들기**: 대시보드 → SQL Editor → `supabase/schema.sql` 내용을 붙여 넣고 Run
 3. **하객 익명 로그인 켜기**: Authentication → Sign In / Providers → **Allow anonymous sign-ins** 켜기
 4. **로그인 메일이 돌아올 주소 등록**: Authentication → URL Configuration
-   - Site URL: `https://wlsdk7245.github.io/weddingBar/`
+   - Site URL: `https://dinado99.github.io/weddingBar/`
    - Redirect URLs: 같은 주소 추가
 5. **연결 정보 넣기**: Project Settings → API 에서 Project URL 과 anon public 키를 복사해 `config.js` 에 넣기
    (anon 키는 공개되어도 괜찮은 키입니다. 데이터는 아래 권한 규칙이 지킵니다.)
-6. **GitHub Pages 켜기**: 배포용 저장소 [`wlsdk7245/weddingBar`](https://github.com/wlsdk7245/weddingBar) 의 Settings → Pages → **Deploy from a branch** → `main` / `/ (root)`.
-   이후 `main`에 올라온 내용이 그대로 사이트가 됩니다. (사이트 주소: https://wlsdk7245.github.io/weddingBar/)
+6. **GitHub Pages 켜기**: 배포용 저장소 [`dinado99/weddingBar`](https://github.com/dinado99/weddingBar) 의 Settings → Pages → **Deploy from a branch** → `main` / `/ (root)`.
+   이후 `main`에 올라온 내용이 그대로 사이트가 됩니다. (사이트 주소: https://dinado99.github.io/weddingBar/)
 
 ### 나중에 추가한 칸 (예전에 SQL을 실행했다면)
 
