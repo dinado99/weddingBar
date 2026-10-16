@@ -6,11 +6,23 @@
   <!-- BUILD:HEAD-START -->
   <title>픽셀 술장 청첩장</title>
   <meta name="claude:viewport-fit-sides" content="cover">
-  <link rel="stylesheet" href="style.css?v=20261016c">
+  <link rel="stylesheet" href="style.css?v=20261016d">
   <!-- BUILD:HEAD-END -->
+  <!-- 카카오톡·문자로 링크를 보낼 때 보이는 미리보기. GitHub Pages는 모든 청첩장에 같은 값을 준다.
+       신랑·신부 이름이 들어간 제목은 사이트의 "카카오톡으로 보내기" 버튼으로 보낼 때 나온다. -->
+  <meta name="description" content="하객이 축하주 한 병씩 올려 채우는 픽셀아트 청첩장">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="픽셀 술장 청첩장">
+  <meta property="og:title" content="우리의 술장 · 픽셀 청첩장">
+  <meta property="og:description" content="축하주 한 병 올려 주세요 🍾">
+  <meta property="og:image" content="https://wlsdk7245.github.io/weddingBar/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://wlsdk7245.github.io/weddingBar/">
+  <meta name="twitter:card" content="summary_large_image">
   <!-- Supabase (config.js에 주소와 키가 있을 때만 쓰인다. 아티팩트 빌드에서는 빠진다) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
-  <script src="config.js?v=20261016c"></script>
+  <script src="config.js?v=20261016d"></script>
 </head>
 <body>
   <main id="app">
@@ -125,6 +137,7 @@
         <h2>📮 하객에게 보낼 링크</h2>
         <p class="hint">이 링크를 카카오톡이나 문자로 보내면 하객이 바로 들어와 술을 올릴 수 있어요.</p>
         <div class="share-row"><span id="share-url" class="share-url"></span><button class="btn" type="button" id="share-copy">복사</button></div>
+        <button class="btn kakao" type="button" id="kakao-share" hidden>💬 카카오톡으로 보내기</button>
       </section>
 
       <section class="panel stats">
@@ -204,10 +217,10 @@
   <div id="toast" class="toast" role="status" hidden></div>
 
   <!-- BUILD:SCRIPTS-START -->
-  <script src="sprites.js?v=20261016c"></script>
-  <script src="music.js?v=20261016c"></script>
-  <script src="store.js?v=20261016c"></script>
-  <script src="app.js?v=20261016c"></script>
+  <script src="sprites.js?v=20261016d"></script>
+  <script src="music.js?v=20261016d"></script>
+  <script src="store.js?v=20261016d"></script>
+  <script src="app.js?v=20261016d"></script>
   <!-- BUILD:SCRIPTS-END -->
 </body>
 </html>

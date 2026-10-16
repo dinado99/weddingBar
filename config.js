@@ -7,4 +7,7 @@ window.PIXEL_BAR_CONFIG = {
   supabaseAnonKey: 'sb_publishable_XfpP3dfqfCegdXKCtzsTPA_B64IpzFU',
   // true면 "체험용이니 실제 정보 대신 예시를 넣어 달라"는 안내를 보여 준다 (사내 체험용)
   trialMode: true,
+  // 카카오톡 공유 버튼용 JavaScript 키 (developers.kakao.com → 내 애플리케이션 → 앱 키).
+  // 공개해도 되는 키다. 비워 두면 공유 버튼이 숨겨진다.
+  kakaoJsKey: '',
 };

@@ -177,6 +177,7 @@ canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: bloc
 .my-list .del { flex: 0 0 76px; padding: 8px 4px; font-size: 12px; white-space: nowrap; }
 .my-list:empty { display: none; }
 .share-row { display: flex; gap: 8px; align-items: center; }
+.btn.kakao { margin-top: 10px; width: 100%; background: #fee500; box-shadow: inset -3px -3px 0 #d8c200, 0 3px 0 #0007; }
 .share-url { flex: 1; min-width: 0; overflow-wrap: anywhere; font-size: 12px; background: #fffaf0; border: 3px solid var(--wood); padding: 6px 8px; user-select: all; }
 
 /* 모달 */

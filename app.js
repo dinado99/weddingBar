@@ -287,6 +287,8 @@
     setPetals(phase === 'day');
     $('#share-panel').hidden = !(S.mode === 'sb' && S.isAdmin);
     $('#share-url').textContent = Store.shareUrl();
+    $('#kakao-share').hidden = !kakaoReady;
+    document.title = `${inv.groom} ♥ ${inv.bride} 결혼합니다`;
 
     const maps = $('#map-links');
     maps.replaceChildren();
@@ -778,6 +780,49 @@
   $('#new-invite-btn').addEventListener('click', () => { creating = true; render(Store.state); });
   $('#home-demo').addEventListener('click', () => startDemo());
   $('#share-copy').addEventListener('click', () => copyText(Store.shareUrl()));
+
+  // ───────── 카카오톡 공유 ─────────
+  // 링크를 그냥 붙여 넣으면 모든 청첩장이 같은 미리보기(우리의 술장)를 보여 준다.
+  // 이 버튼으로 보내면 "신랑 ♥ 신부 결혼합니다" 제목과 픽셀 썸네일이 담긴 카드로 간다.
+  let kakaoReady = false;
+  const KAKAO_SDK = 'https://t1.kakaocdn.net/kakao_js_sdk/2.7.2/kakao.min.js';
+  function initKakao() {
+    const key = (window.PIXEL_BAR_CONFIG || {}).kakaoJsKey;
+    if (!key) return;
+    const s = document.createElement('script');
+    s.src = KAKAO_SDK;
+    s.onload = () => {
+      try {
+        if (!window.Kakao.isInitialized()) window.Kakao.init(key);
+        kakaoReady = true;
+        if (!$('#invite').hidden) renderInvite();
+      } catch (e) { console.warn('kakao init', e); }
+    };
+    document.head.appendChild(s);
+  }
+  $('#kakao-share').addEventListener('click', () => {
+    const inv = S.invitation;
+    if (!kakaoReady || !inv) return;
+    const url = Store.shareUrl();
+    const link = { mobileWebUrl: url, webUrl: url };
+    try {
+      window.Kakao.Share.sendDefault({
+        objectType: 'feed',
+        content: {
+          title: `${inv.groom} ♥ ${inv.bride} 결혼합니다`,
+          description: `${formatWhen(inv)} · ${inv.venue}\n우리의 술장에 축하주 한 병 올려 주세요`,
+          imageUrl: new URL('og.png', location.href).href,
+          imageWidth: 1200,
+          imageHeight: 630,
+          link,
+        },
+        buttons: [{ title: '술장 구경하기', link }],
+      });
+    } catch (e) {
+      toast('카카오톡 공유를 열지 못했어요. 링크를 복사해서 보내 주세요.', String(e && e.message || e));
+    }
+  });
+  initKakao();
 
   // ───────── 예시 화면 ─────────
   function startDemo() {
