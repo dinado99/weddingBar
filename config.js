@@ -9,5 +9,5 @@ window.PIXEL_BAR_CONFIG = {
   trialMode: true,
   // 카카오톡 공유 버튼용 JavaScript 키 (developers.kakao.com → 내 애플리케이션 → 앱 키).
   // 공개해도 되는 키다. 비워 두면 공유 버튼이 숨겨진다.
-  kakaoJsKey: '',
+  kakaoJsKey: '83955c6c6d38f112a1f4f280585335b1',
 };
